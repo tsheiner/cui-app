@@ -1,5 +1,15 @@
 import streamlit as st
-from openai import OpenAI
+import openai
+
+# Load secrets
+client_id = st.secrets["openai"]["client_id"]
+client_secret = st.secrets["openai"]["client_secret"]
+app_key = st.secrets["openai"]["app_key"]
+
+# Initialize OpenAI client
+openai.api_key = app_key
+
+# Use these variables to connect to the OpenAI model
 from streamlit_extras.stylable_container import stylable_container
 
 pg = st.navigation([st.Page("1_Plotting_Demo.py"), st.Page("2_Mapping_Demo.py"), st.Page("3_DataFrame_Demo.py")])
@@ -21,6 +31,21 @@ css_styles = """
     border-radius: 0.5rem;
     padding: calc(1em - 1px);
 """
+
+# Function to handle the AI response
+def get_ai_response(user_input):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=user_input,
+        max_tokens=150
+    )
+    return response.choices[0].text.strip()
+
+# Layout for sidebar chat
+user_input = st.text_input("Enter your query:")
+if user_input:
+    ai_response = get_ai_response(user_input)
+    st.write(ai_response)
 
 # Function to handle the AI response (mockup)
 def get_ai_response(user_input):

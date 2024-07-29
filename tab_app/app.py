@@ -115,7 +115,7 @@ def handle_input():
         response = send_prompt(user_input)
         if response:
             # Update chat history
-            st.session_state.chat_history += f"User: {user_input}\nAI: {response}\n"
+            st.session_state.chat_history += f"User: {user_input}\n\nAI: {response}\n\n"
             # Clear the input box
             st.session_state.user_input = ""
             #st.rerun()
@@ -123,7 +123,8 @@ def handle_input():
             st.sidebar.error("Failed to get a response from the AI.")
 
 # Display chat history
-st.sidebar.text_area("Chat History", value=st.session_state.chat_history, height=400, disabled=True)
+# st.sidebar.text_area("Chat History", value=st.session_state.chat_history, height=400, disabled=True)
+st.sidebar.markdown(body=st.session_state.chat_history)
 
 # Get user input with on_change callback
 st.sidebar.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)

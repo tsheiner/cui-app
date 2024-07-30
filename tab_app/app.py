@@ -9,6 +9,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
+from streamlit_extras.bottom_container import bottom
 
 # Create the option menu
 selected = option_menu(
@@ -81,6 +82,36 @@ def send_prompt(prompt):
     response = llm.invoke(prompt)
     return response.content
 
+# Inject custom CSS
+# st.markdown("""
+#     <style>
+#     .sidebar .sidebar-content {
+#         display: flex;
+#         flex-direction: column;
+#         height: 100%;
+#     }
+#     .sidebar .sidebar-content .chat-history {
+#         flex-grow: 1;
+#         overflow-y: auto;
+#     }
+#     .sidebar .sidebar-content .chat-input {
+#         position: sticky;
+#         bottom: 0;
+#         background-color: #f0f2f6;
+#         padding: 10px 0;
+#     }
+#     </style>
+#     <script>
+#     document.addEventListener('DOMContentLoaded', function() {
+#         var chatInput = document.querySelector('.chat-input');
+#         var observer = new MutationObserver(function() {
+#             chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+#         });
+#         observer.observe(document.querySelector('.chat-history'), { childList: true });
+#     });
+#     </script>
+#     """, unsafe_allow_html=True)
+
 # Main logic
 st.sidebar.title("Chat with AI")
 
@@ -89,24 +120,6 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = ""
 if 'user_input' not in st.session_state:
     st.session_state.user_input = ""
-
-# # Display chat history
-# st.sidebar.text_area("Chat History", value=st.session_state.chat_history, height=400, disabled=True)
-
-# # Get user input
-# user_input = st.sidebar.text_input("Enter your message:", value=st.session_state.user_input, key="input")
-
-# if st.sidebar.button("Send"):
-#     if user_input:
-#         response = send_prompt(user_input)
-#         if response:
-#             # Update chat history
-#             st.session_state.chat_history += f"User: {user_input}\nAI: {response}\n"
-#             # Clear the input box
-#             st.session_state.user_input = ""
-#             st.rerun()
-#         else:
-#             st.sidebar.error("Failed to get a response from the AI.")
 
 # Function to handle user input
 def handle_input():
@@ -122,10 +135,48 @@ def handle_input():
         else:
             st.sidebar.error("Failed to get a response from the AI.")
 
-# Display chat history
-# st.sidebar.text_area("Chat History", value=st.session_state.chat_history, height=400, disabled=True)
-st.sidebar.markdown(body=st.session_state.chat_history)
+# # Display chat history
+# st.sidebar.markdown(body=st.session_state.chat_history)
 
-# Get user input with on_change callback
-st.sidebar.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)
+# # Get user input with on_change callback
+# st.sidebar.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)
+# footer="""<style>
+# a:link , a:visited{
+# color: blue;
+# background-color: transparent;
+# text-decoration: underline;
+# }
 
+
+# a:hover,  a:active {
+# color: red;
+# background-color: transparent;
+# text-decoration: underline;
+# }
+
+# .footer {
+# position: fixed;
+# left: 0;
+# bottom: 0;
+# width: 100%;
+# background-color: white;
+# color: black;
+# text-align: center;
+# }
+# </style>
+# <div class="footer">
+# <p>Developed with ❤ by <a style='display: block; text-align: center;' href="https://www.heflin.dev/" target="_blank">Heflin Stephen Raj S</a></p>
+# </div>
+# """
+with st.sidebar:  
+    with bottom():
+            st.write("This is the bottom container")
+            st.text_input("This is a text input in the bottom container")
+
+# Sidebar layout
+
+with st.sidebar:
+    with st.expander("Chat History", expanded=True):
+        st.markdown(st.session_state.chat_history)
+    
+    st.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)

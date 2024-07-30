@@ -72,21 +72,26 @@ def main():
     ui.query('.q-page').classes('flex')
     ui.query('.nicegui-content').classes('w-full')
 
-    with ui.tabs().classes('w-full') as tabs:
-        chat_tab = ui.tab('Chat')
-        logs_tab = ui.tab('Logs')
-    with ui.tab_panels(tabs, value=chat_tab).classes('w-full max-w-2xl mx-auto flex-grow items-stretch'):
-        message_container = ui.tab_panel(chat_tab).classes('items-stretch')
-        with ui.tab_panel(logs_tab):
-            log = ui.log().classes('w-full h-full')
+    with ui.row().classes('h-full'):
+        with ui.column().classes('w-1/4 h-full bg-gray-200 p-4').style('background-color: #eee; overflow-y: auto;'):
+            ui.label('Sidebar')
+            ui.link('Link 1', '#')
+            ui.link('Link 2', '#')
+            ui.link('Link 3', '#')
 
-    with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6'):
-        with ui.row().classes('w-full no-wrap items-center'):
-            placeholder = 'type a prompt'
-            text = ui.input(placeholder=placeholder).props('rounded outlined input-class=mx-3') \
-                .classes('w-full self-center').on('keydown.enter', send)
-        ui.markdown('not original') \
-            .classes('text-xs self-end mr-8 m-[-1em] text-primary')
+        with ui.column().classes('w-3/4 h-full p-4').style('overflow-y: auto;'):
+            with ui.tabs().classes('w-full') as tabs:
+                chat_tab = ui.tab('Chat')
+                logs_tab = ui.tab('Logs')
+            with ui.tab_panels(tabs, value=chat_tab).classes('w-full max-w-2xl mx-auto flex-grow items-stretch'):
+                message_container = ui.tab_panel(chat_tab).classes('items-stretch')
+                with ui.tab_panel(logs_tab):
+                    log = ui.log().classes('w-full h-full')
 
+            with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6'):
+                with ui.row().classes('w-full no-wrap items-center'):
+                    placeholder = 'type a prompt'
+                    text = ui.input(placeholder=placeholder).props('rounded outlined input-class=mx-3') \
+                        .classes('w-full self-center').on('keydown.enter', send)
 
-ui.run(title='Chat with GPT-3 (example)')
+ui.run()

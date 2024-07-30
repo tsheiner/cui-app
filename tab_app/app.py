@@ -10,6 +10,7 @@ import requests
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from streamlit_extras.bottom_container import bottom
+import streamlit.components.v1 as components
 
 # Create the option menu
 selected = option_menu(
@@ -140,38 +141,11 @@ def handle_input():
 
 # # Get user input with on_change callback
 # st.sidebar.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)
-# footer="""<style>
-# a:link , a:visited{
-# color: blue;
-# background-color: transparent;
-# text-decoration: underline;
-# }
 
-
-# a:hover,  a:active {
-# color: red;
-# background-color: transparent;
-# text-decoration: underline;
-# }
-
-# .footer {
-# position: fixed;
-# left: 0;
-# bottom: 0;
-# width: 100%;
-# background-color: white;
-# color: black;
-# text-align: center;
-# }
-# </style>
-# <div class="footer">
-# <p>Developed with ❤ by <a style='display: block; text-align: center;' href="https://www.heflin.dev/" target="_blank">Heflin Stephen Raj S</a></p>
-# </div>
-# """
-with st.sidebar:  
-    with bottom():
-            st.write("This is the bottom container")
-            st.text_input("This is a text input in the bottom container")
+ 
+# with bottom():
+#         st.write("This is the bottom container")
+#         st.text_input("This is a text input in the bottom container")
 
 # Sidebar layout
 
@@ -180,3 +154,31 @@ with st.sidebar:
         st.markdown(st.session_state.chat_history)
     
     st.text_input("Enter your message:", value=st.session_state.user_input, key="user_input", on_change=handle_input)
+
+# Inject JavaScript to assign a custom class to the text input
+components.html("""
+     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var textInput = parent.document.querySelectorAll('input[type="text"]');
+        if (textInput.length > 0) {
+            textInput[0].classList.add('chatInput');
+        }
+    });
+    </script>
+""")
+
+st.markdown(
+    """
+    <style>
+    .chatInput {
+        border: 2px solid #4CAF50;
+        padding: 10px;
+        font-size: 16px;
+        position: sticky;
+        bottom: 0; /* Stick to the bottom of the sidebar */
+        width: calc(100% - 40px); /* Adjust width to fit within the sidebar */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)

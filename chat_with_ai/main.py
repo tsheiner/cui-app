@@ -9,8 +9,6 @@ import base64
 
 from nicegui import ui
 
-OPENAI_API_KEY = 'not-set'  # TODO: set your OpenAI API key here
-
 # Load environment variables
 load_dotenv()
 
@@ -84,11 +82,10 @@ def main():
 
     with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6'):
         with ui.row().classes('w-full no-wrap items-center'):
-            placeholder = 'message' if OPENAI_API_KEY != 'not-set' else \
-                'Please provide your OPENAI key in the Python script first!'
+            placeholder = 'type a prompt'
             text = ui.input(placeholder=placeholder).props('rounded outlined input-class=mx-3') \
                 .classes('w-full self-center').on('keydown.enter', send)
-        ui.markdown('simple chat app built with [NiceGUI](https://nicegui.io)') \
+        ui.markdown('not original') \
             .classes('text-xs self-end mr-8 m-[-1em] text-primary')
 
 

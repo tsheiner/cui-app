@@ -10,16 +10,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     let typingTimer;
 
-    // function updateCursorPosition() {
-    //     const promptRect = prompt.getBoundingClientRect();
-    //     const cursorPosition = input.value.length * 8; // Assuming 8px char width
-    //     cursor.style.left = `${promptRect.width + cursorPosition}px`;
-    //     cursor.style.bottom = '0px';
-    //     cursor.classList.remove('blink');
-    //     clearTimeout(typingTimer);
-    //     typingTimer = setTimeout(() => cursor.classList.add('blink'), 500);
-    // }
-
     function updateCursorPosition() {
         const promptRect = prompt.getBoundingClientRect();
         const cursorPosition = input.value.length * 8; // Assuming 8px char width
@@ -45,10 +35,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 body: JSON.stringify({ prompt: command })
             });
             const data = await response.json();
-            return data.response;
+            return data;
         } catch (error) {
             console.error('Error sending command:', error);
-            return 'Error: Unable to process command';
+            return { response: 'Error: Unable to process command', switch_tab: null };
         }
     }
 
@@ -63,21 +53,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
             input.value = '';
             moveCursorToNewLine();
             
-            const response = await sendCommand(command);
-            handleResponse(response);
+            const { response, switch_tab } = await sendCommand(command);
+            handleResponse(response, switch_tab);
         }
     });
 
-    function handleResponse(response) {
-        // output.textContent += `${response}\n\n`;
-        output.textContent += `${response}\n`;
-        terminal.scrollTop = terminal.scrollHeight;
-        moveCursorToNewLine();
-        
-        const match = response.match(/switch to (Clients|Switches|Access Points)/i);
-        if (match) {
-            const tabName = match[1].trim();
-            switchTab(tabName);
+    function handleResponse(response, switch_tab) {
+        if (response) {
+            output.textContent += `${response}\n`;
+            terminal.scrollTop = terminal.scrollHeight;
+            moveCursorToNewLine();
+            
+            if (switch_tab) {
+                switchTab(switch_tab);
+            }
+        } else {
+            output.textContent += "Error: No response received from the server.\n";
         }
     }
 

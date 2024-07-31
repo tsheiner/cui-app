@@ -42,9 +42,30 @@ def init_llm():
 
 # Function to send a prompt to the LLM
 def send_prompt(prompt):
+    system_message = (
+    "You are pretending to be a network management assistant. Pretend you have access to all the APIs for a large Meraki network."
+    "You will provide made up information about clients, switches, and access points on the network. "
+    "If a user asks about one of these topics, include a command to switch to the appropriate "
+    "tab in your response. Use the following format at the end of your response: [SWITCH_TAB: <tab_name>], "
+    "where <tab_name> is either Clients, Switches, or Access Points."
+    "If you are including a command to switch to a tab, ONLY mention this in the end of your response."
+)
+    
     llm = init_llm()
-    response = llm.invoke(prompt)
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": prompt}
+    ]
+    response = llm.invoke(messages)
     return response.content
+
+def parse_response(response):
+    parts = response.split('[SWITCH_TAB:')
+    if len(parts) > 1:
+        tab_name = parts[1].split(']')[0].strip()
+        clean_response = parts[0].strip()
+        return clean_response, tab_name
+    return response, None
 
 # Endpoint to handle terminal shell requests
 @app.route('/api/terminal', methods=['POST'])
@@ -55,15 +76,13 @@ def terminal():
         return jsonify({"error": "No prompt provided"}), 400
     
     response = send_prompt(prompt)
-    return jsonify({"response": response})
+    clean_response, tab_name = parse_response(response)
+    return jsonify({"response": clean_response, "switch_tab": tab_name})
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# @app.route('/tab/<int:tab_id>')
-# def tab(tab_id):
-#     return render_template(f'tab{tab_id}.html', title=f'Tab {tab_id}')
 
 @app.route('/tab/<int:tab_id>')
 def tab(tab_id):

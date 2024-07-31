@@ -1,0 +1,15 @@
+project/
+│
+├── app.py
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── tab1.html
+│   ├── tab2.html
+│   └── tab3.html
+└── static/
+    ├── css/
+    │   └── styles.css
+    └── js/
+        ├── terminal.js
+        └── resizer.js

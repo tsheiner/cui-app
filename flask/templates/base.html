@@ -1,3 +1,4 @@
+<!-- base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +16,17 @@
                     <span id="prompt">$</span>
                     <div id="input-container">
                         <input type="text" id="input" autofocus>
-                        <span id="cursor" class="blink"></span>
+                        <div id="cursor" class="blink"></div>
                     </div>
                 </div>
             </div>
-            <div class="resizer" id="resizer"></div>
+            <div id="resizer" class="resizer"></div>
         </div>
         <div class="content">
             <div class="tabs">
-                <a href="{{ url_for('tab', tab_id=1) }}" class="tab">Tab 1</a>
-                <a href="{{ url_for('tab', tab_id=2) }}" class="tab">Tab 2</a>
-                <a href="{{ url_for('tab', tab_id=3) }}" class="tab">Tab 3</a>
+                <a href="{{ url_for('tab', tab_id=1) }}" class="tab" id="tab-clients">Clients</a>
+                <a href="{{ url_for('tab', tab_id=2) }}" class="tab" id="tab-switches">Switches</a>
+                <a href="{{ url_for('tab', tab_id=3) }}" class="tab" id="tab-access-points">Access Points</a>
             </div>
             <div class="tab-content">
                 {% block content %}{% endblock %}

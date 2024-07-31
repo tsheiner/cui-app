@@ -1,17 +1,23 @@
 import os
 import base64
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
-from flask import Flask, render_template
+from anthropic import Anthropic
 
 app = Flask(__name__)
+
+# Load environment variables
+load_dotenv()
+
+# Set the active vendor here by commenting/uncommenting the desired line
+# ACTIVE_VENDOR = 'azure'
+ACTIVE_VENDOR = 'anthropic'
 
 # Function to get Azure AI token
 def azure_ai_token():
     url = "https://id.cisco.com/oauth2/default/v1/token"
-
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
     payload = "grant_type=client_credentials"
@@ -21,14 +27,12 @@ def azure_ai_token():
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": f"Basic {value}"
     }
-
-    #url = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"  # Replace with your tenant ID
     token_response = requests.request("POST", url, headers=headers, data=payload)
     API_KEY = token_response.json()["access_token"]
     return API_KEY
 
-# Function to initialize the LLM
-def init_llm():
+# Function to initialize the Azure LLM
+def init_azure_llm():
     user_info = '{"appkey": "' + os.getenv('APP_KEY') + '"}'
     llm = AzureChatOpenAI(
         azure_endpoint='https://chat-ai.cisco.com',
@@ -40,24 +44,48 @@ def init_llm():
     )
     return llm
 
-# Function to send a prompt to the LLM
+# Function to initialize the Anthropic LLM
+def init_anthropic_llm():
+    api_key = os.getenv('ANTHROPIC_API_KEY')
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY environment variable is not set")
+    
+    client = Anthropic(api_key=api_key)
+    return Anthropic(api_key=api_key)
+
+# Function to send a prompt to the active LLM
 def send_prompt(prompt):
     system_message = (
-    "You are pretending to be a network management assistant. Pretend you have access to all the APIs for a large Meraki network."
-    "You will provide made up information about clients, switches, and access points on the network. "
-    "If a user asks about one of these topics, include a command to switch to the appropriate "
-    "tab in your response. Use the following format at the end of your response: [SWITCH_TAB: <tab_name>], "
-    "where <tab_name> is either Clients, Switches, or Access Points."
-    "If you are including a command to switch to a tab, ONLY mention this in the end of your response."
-)
-    
-    llm = init_llm()
-    messages = [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": prompt}
-    ]
-    response = llm.invoke(messages)
-    return response.content
+        "You are pretending to be a network management assistant. Pretend you have access to all the APIs for a large Meraki network. "
+        "You will provide made up information about clients, switches, and access points on the network. "
+        "If a user asks about one of these topics, include a command to switch to the appropriate "
+        "tab in your response. Use the following format at the end of your response: [SWITCH_TAB: <tab_name>], "
+        "where <tab_name> is either Clients, Switches, or Access Points. "
+        "If you are including a command to switch to a tab, ONLY mention this in the end of your response."
+    )
+
+    if ACTIVE_VENDOR == 'azure':
+        llm = init_azure_llm()
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": prompt}
+        ]
+        response = llm.invoke(messages)
+        return response.content
+    elif ACTIVE_VENDOR == 'anthropic':
+        client = init_anthropic_llm()
+        message = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=1000,
+            system=system_message,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return message.content[0].text
+    else:
+        raise ValueError(f"Unsupported vendor: {ACTIVE_VENDOR}")
+
 
 def parse_response(response):
     parts = response.split('[SWITCH_TAB:')
@@ -75,10 +103,12 @@ def terminal():
     if not prompt:
         return jsonify({"error": "No prompt provided"}), 400
     
-    response = send_prompt(prompt)
-    clean_response, tab_name = parse_response(response)
-    return jsonify({"response": clean_response, "switch_tab": tab_name})
-
+    try:
+        response = send_prompt(prompt)
+        clean_response, tab_name = parse_response(response)
+        return jsonify({"response": clean_response, "switch_tab": tab_name})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/')
 def index():

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Terminal App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="terminal">
+            <div id="terminal">
+                <div id="output"></div>
+                <div id="input-line">
+                    <span id="prompt">$</span>
+                    <div id="input-container">
+                        <input type="text" id="input" autofocus>
+                        <span id="cursor" class="blink"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="resizer" id="resizer"></div>
+        </div>
+        <div class="content">
+            <div class="tabs">
+                <a href="{{ url_for('tab', tab_id=1) }}" class="tab">Tab 1</a>
+                <a href="{{ url_for('tab', tab_id=2) }}" class="tab">Tab 2</a>
+                <a href="{{ url_for('tab', tab_id=3) }}" class="tab">Tab 3</a>
+            </div>
+            <div class="tab-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/resizer.js') }}"></script>
+</body>
+</html>

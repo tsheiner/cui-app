@@ -12,8 +12,8 @@ app = Flask(__name__)
 load_dotenv()
 
 # Set the active vendor here by commenting/uncommenting the desired line
-# ACTIVE_VENDOR = 'azure'
-ACTIVE_VENDOR = 'anthropic'
+ACTIVE_VENDOR = 'azure'
+#ACTIVE_VENDOR = 'anthropic'
 
 # Function to get Azure AI token
 def azure_ai_token():
